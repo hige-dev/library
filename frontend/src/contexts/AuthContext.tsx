@@ -53,13 +53,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // 期限切れの場合はクリア
           localStorage.removeItem(STORAGE_KEY);
           localStorage.removeItem(TOKEN_KEY);
+          setAuthToken(null);
         } else {
+          // stateを設定する前にapi.tsにトークンを設定
+          setAuthToken(storedToken);
           setUser(JSON.parse(storedUser) as User);
           setToken(storedToken);
         }
+      } else {
+        setAuthToken(null);
       }
     } catch (e) {
       console.error('Failed to restore auth state:', e);
+      setAuthToken(null);
     } finally {
       setIsLoading(false);
     }
