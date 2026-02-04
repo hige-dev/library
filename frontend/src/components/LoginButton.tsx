@@ -21,7 +21,6 @@ export function LoginButton() {
       <GoogleLogin
         onSuccess={handleSuccess}
         onError={handleError}
-        useOneTap
       />
       {error && <p className="error-message">{error}</p>}
     </div>

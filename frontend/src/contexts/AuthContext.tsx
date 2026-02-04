@@ -88,6 +88,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       const newUser: User = { email, name, picture };
+      // stateを設定する前にapi.tsにトークンを設定
+      setAuthToken(credential);
       setUser(newUser);
       setToken(credential);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
@@ -99,6 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = useCallback(() => {
+    setAuthToken(null);
     setUser(null);
     setToken(null);
     setError(null);
