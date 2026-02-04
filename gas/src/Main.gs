@@ -16,6 +16,16 @@ function doGet(e) {
 function doPost(e) {
   try {
     var request = JSON.parse(e.postData.contents);
+
+    // 認証
+    var auth = authenticateRequest(request);
+    if (auth.error) {
+      return createJsonOutput(createErrorResponse(auth.error));
+    }
+
+    // 認証済みユーザー情報をリクエストに追加
+    request.authenticatedUser = auth.user;
+
     var result = handleRequest(request);
     return createJsonOutput(createSuccessResponse(result));
   } catch (error) {
@@ -43,9 +53,16 @@ function handleRequest(request) {
       return searchBooks(request.query);
 
     case 'createBook':
+      // 認証済みユーザーをcreatedByに使用
+      request.book.createdBy = request.authenticatedUser.email;
       return createBook(request.book);
 
     case 'createBooks':
+      // 認証済みユーザーをcreatedByに使用
+      var userEmail = request.authenticatedUser.email;
+      request.books.forEach(function(book) {
+        book.createdBy = userEmail;
+      });
       return createBooks(request.books);
 
     case 'deleteBook':
@@ -60,7 +77,8 @@ function handleRequest(request) {
       return getLoanByBookId(request.bookId);
 
     case 'borrowBook':
-      return borrowBook(request.bookId, request.borrower);
+      // 認証済みユーザーをborrowerに使用
+      return borrowBook(request.bookId, request.authenticatedUser.email);
 
     case 'returnBook':
       return returnBook(request.loanId);

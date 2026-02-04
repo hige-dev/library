@@ -4,9 +4,30 @@ import type { Book, Loan, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolum
 // Google Books API
 const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
 
+// 認証トークン（グローバル）
+let authToken: string | null = null;
+
+/**
+ * 認証トークンを設定
+ */
+export function setAuthToken(token: string | null): void {
+  authToken = token;
+}
+
+/**
+ * 認証トークンを取得
+ */
+export function getAuthToken(): string | null {
+  return authToken;
+}
+
 // GAS API呼び出し用のヘルパー（fetchを使用）
 async function callGasApi<T>(action: string, params: Record<string, unknown> = {}): Promise<T> {
-  const body = JSON.stringify({ action, ...params });
+  if (!authToken) {
+    throw new Error('認証が必要です');
+  }
+
+  const body = JSON.stringify({ action, token: authToken, ...params });
 
   const response = await fetch(config.gasApiUrl, {
     method: 'POST',
@@ -23,6 +44,10 @@ async function callGasApi<T>(action: string, params: Record<string, unknown> = {
   const data: ApiResponse<T> = await response.json();
 
   if (!data.success) {
+    // 認証エラーの場合は特別なエラーを投げる
+    if (data.error === 'Unauthorized' || data.error === 'Token expired') {
+      throw new Error('AUTH_ERROR:' + data.error);
+    }
     throw new Error(data.error || 'APIエラーが発生しました');
   }
 
@@ -137,10 +162,10 @@ export const loansApi = {
   },
 
   /**
-   * 貸出を作成
+   * 貸出を作成（借り手は認証ユーザーから自動設定）
    */
-  async borrow(bookId: string, borrower: string): Promise<Loan> {
-    return callGasApi<Loan>('borrowBook', { bookId, borrower });
+  async borrow(bookId: string): Promise<Loan> {
+    return callGasApi<Loan>('borrowBook', { bookId });
   },
 
   /**

@@ -92,7 +92,7 @@ export function BookListPage() {
   const handleBorrow = async (bookId: string) => {
     if (!user) return;
     try {
-      await loansApi.borrow(bookId, user.email);
+      await loansApi.borrow(bookId);
       await fetchData(false);
     } catch (e) {
       console.error(e);

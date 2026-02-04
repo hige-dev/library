@@ -33,6 +33,9 @@ cp .clasp.json.example .clasp.json
 2. 「プロジェクトの設定」→「スクリプト プロパティ」
 3. 以下のプロパティを追加:
    - `SPREADSHEET_ID`: スプレッドシートのID
+   - `ALLOWED_DOMAINS`: 許可するメールドメイン（カンマ区切り、任意）
+     - 例: `example.com,company.co.jp`
+     - 空欄で全ドメイン許可
 
 ### 4. デプロイ
 
@@ -114,9 +117,9 @@ gas/
 ├── src/
 │   ├── Config.gs         # 定数・設定
 │   ├── Utils.gs          # ユーティリティ関数
+│   ├── AuthService.gs    # 認証サービス（JWT検証）
 │   ├── BookService.gs    # 書籍サービス
 │   ├── LoanService.gs    # 貸出サービス
-│   ├── GoogleBooksService.gs  # Google Books API（未使用）
 │   └── Main.gs           # エントリーポイント
 └── README.md
 ```

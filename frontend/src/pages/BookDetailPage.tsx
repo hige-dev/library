@@ -46,7 +46,7 @@ export function BookDetailPage() {
     if (!book || !user) return;
     try {
       setIsProcessing(true);
-      const loan = await loansApi.borrow(book.id, user.email);
+      const loan = await loansApi.borrow(book.id);
       setCurrentLoan(loan);
     } catch (e) {
       setError('貸出処理に失敗しました。');
