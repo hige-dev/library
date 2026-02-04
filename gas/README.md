@@ -2,20 +2,7 @@
 
 ## セットアップ手順
 
-### 1. Google Cloud Console での設定
-
-1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
-2. 新しいプロジェクトを作成（または既存のプロジェクトを選択）
-3. 「APIとサービス」→「ライブラリ」で以下のAPIを有効化:
-   - Google Sheets API
-   - Google Books API
-
-### 2. スプレッドシートの準備
-
-1. Google スプレッドシートを新規作成
-2. スプレッドシートのIDをメモ（URLの `/d/` と `/edit` の間の文字列）
-
-### 3. clasp のセットアップ
+### 1. clasp のセットアップ
 
 ```bash
 # clasp をグローバルインストール
@@ -25,46 +12,45 @@ npm install -g @google/clasp
 clasp login
 
 # GASプロジェクトを作成
-clasp create-script --type webapp --title "Library API"
+clasp create --type webapp --title "Library API"
 
 # または既存のプロジェクトをクローン
-clasp clone-script <scriptId>
+clasp clone <scriptId>
 ```
 
-### 4. 設定ファイルの準備
+### 2. 設定ファイルの準備
 
 ```bash
-# .clasp.json を作成
+# .clasp.json を作成（clasp createで自動生成される）
+# 既存プロジェクトの場合:
 cp .clasp.json.example .clasp.json
-
 # scriptId を編集
 ```
 
-### 5. スクリプトプロパティの設定
+### 3. スクリプトプロパティの設定
 
-1. GASプロジェクトを開く: `clasp open-script`
+1. GASプロジェクトを開く: `clasp open`
 2. 「プロジェクトの設定」→「スクリプト プロパティ」
 3. 以下のプロパティを追加:
    - `SPREADSHEET_ID`: スプレッドシートのID
 
-### 6. デプロイ
+### 4. デプロイ
 
 ```bash
 # コードをプッシュ
 clasp push
 
-# 初期セットアップを実行（スクリプトエディタで手動実行）
-# setupSpreadsheet() を実行
-
 # Webアプリとしてデプロイ
-clasp create-deployment --description "v1.0.0"
+clasp deploy --description "v1.0.0"
 ```
 
-### 7. デプロイURLの取得
+または `./deploy.sh` を使用（デプロイURLを自動でfrontendの.envに反映）
 
-1. スクリプトエディタで「デプロイ」→「デプロイを管理」
-2. ウェブアプリのURLをコピー
-3. フロントエンドの `.env` ファイルに設定
+### 5. Web App の設定
+
+スクリプトエディタで「デプロイ」→「デプロイを管理」→「編集」:
+- 実行ユーザー: **自分**
+- アクセスできるユーザー: **全員**（CORS対応のため必須）
 
 ## API仕様
 
@@ -109,7 +95,9 @@ fetch(GAS_URL, {
       publishedDate: '2024-01-01',
       imageUrl: 'https://...',
       googleBooksId: 'xxx',
-      createdBy: 'user@example.com'
+      createdBy: 'user@example.com',
+      genre: '',
+      titleKana: ''
     }
   })
 })
@@ -119,14 +107,28 @@ fetch(GAS_URL, {
 
 ```
 gas/
-├── appsscript.json    # GASプロジェクト設定
-├── .clasp.json        # clasp設定（要作成）
+├── appsscript.json       # GASプロジェクト設定
+├── .clasp.json           # clasp設定（要作成）
+├── .clasp.json.example   # clasp設定のサンプル
+├── deploy.sh             # デプロイスクリプト
 ├── src/
-│   ├── Config.ts      # 定数・設定
-│   ├── Types.ts       # 型定義
-│   ├── Utils.ts       # ユーティリティ関数
-│   ├── BookService.ts # 書籍サービス
-│   ├── LoanService.ts # 貸出サービス
-│   └── Main.ts        # エントリーポイント
+│   ├── Config.gs         # 定数・設定
+│   ├── Utils.gs          # ユーティリティ関数
+│   ├── BookService.gs    # 書籍サービス
+│   ├── LoanService.gs    # 貸出サービス
+│   ├── GoogleBooksService.gs  # Google Books API（未使用）
+│   └── Main.gs           # エントリーポイント
 └── README.md
 ```
+
+## トラブルシューティング
+
+### CORS エラー
+
+- Web Appのアクセス設定が「全員」になっているか確認
+- `appsscript.json` の `access` が `ANYONE_ANONYMOUS` になっているか確認
+
+### 認証エラー
+
+- スクリプトプロパティに `SPREADSHEET_ID` が設定されているか確認
+- スプレッドシートへのアクセス権限があるか確認
