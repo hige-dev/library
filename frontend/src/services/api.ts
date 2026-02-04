@@ -85,6 +85,13 @@ export const booksApi = {
   },
 
   /**
+   * 書籍を1件取得
+   */
+  async getById(id: string): Promise<Book | null> {
+    return callGasApi<Book | null>('getBookById', { id });
+  },
+
+  /**
    * 書籍を検索
    */
   async search(query: string): Promise<Book[]> {

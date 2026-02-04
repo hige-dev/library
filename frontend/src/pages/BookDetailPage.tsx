@@ -22,16 +22,15 @@ export function BookDetailPage() {
       if (!id) return;
       try {
         setIsLoading(true);
-        const [booksData, loanData] = await Promise.all([
-          booksApi.getAll(),
+        const [bookData, loanData] = await Promise.all([
+          booksApi.getById(id),
           loansApi.getByBookId(id),
         ]);
-        const foundBook = booksData.find((b) => b.id === id);
-        if (!foundBook) {
+        if (!bookData) {
           setError('書籍が見つかりません。');
           return;
         }
-        setBook(foundBook);
+        setBook(bookData);
         setCurrentLoan(loanData);
       } catch (e) {
         setError('データの取得に失敗しました。');

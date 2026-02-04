@@ -49,9 +49,31 @@ function getBookById(id) {
 }
 
 /**
+ * ISBNまたはGoogleBooksIdで書籍の重複をチェック
+ */
+function checkDuplicateBook(isbn, googleBooksId) {
+  var books = getBooks();
+  for (var i = 0; i < books.length; i++) {
+    if (isbn && books[i].isbn === isbn) {
+      return books[i];
+    }
+    if (googleBooksId && books[i].googleBooksId === googleBooksId) {
+      return books[i];
+    }
+  }
+  return null;
+}
+
+/**
  * 書籍を作成
  */
 function createBook(bookData) {
+  // 重複チェック
+  var duplicate = checkDuplicateBook(bookData.isbn, bookData.googleBooksId);
+  if (duplicate) {
+    throw new Error('この書籍は既に登録されています: ' + duplicate.title);
+  }
+
   var sheet = getOrCreateSheet(SHEET_NAMES.BOOKS);
 
   var book = {
@@ -65,6 +87,8 @@ function createBook(bookData) {
     googleBooksId: bookData.googleBooksId,
     createdAt: getCurrentISOString(),
     createdBy: bookData.createdBy,
+    genre: bookData.genre || '',
+    titleKana: bookData.titleKana || '',
   };
 
   sheet.appendRow(bookToRow(book));
@@ -73,13 +97,20 @@ function createBook(bookData) {
 }
 
 /**
- * 複数の書籍を一括作成
+ * 複数の書籍を一括作成（重複はスキップ）
  */
 function createBooks(booksData) {
   var sheet = getOrCreateSheet(SHEET_NAMES.BOOKS);
   var createdBooks = [];
+  var rows = [];
 
-  var rows = booksData.map(function(bookData) {
+  booksData.forEach(function(bookData) {
+    // 重複チェック（重複はスキップ）
+    var duplicate = checkDuplicateBook(bookData.isbn, bookData.googleBooksId);
+    if (duplicate) {
+      return; // スキップ
+    }
+
     var book = {
       id: generateUUID(),
       title: bookData.title,
@@ -91,9 +122,11 @@ function createBooks(booksData) {
       googleBooksId: bookData.googleBooksId,
       createdAt: getCurrentISOString(),
       createdBy: bookData.createdBy,
+      genre: bookData.genre || '',
+      titleKana: bookData.titleKana || '',
     };
     createdBooks.push(book);
-    return bookToRow(book);
+    rows.push(bookToRow(book));
   });
 
   // 一括追加

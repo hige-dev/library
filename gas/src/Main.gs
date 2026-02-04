@@ -36,6 +36,9 @@ function handleRequest(request) {
     case 'getBooks':
       return getBooks();
 
+    case 'getBookById':
+      return getBookById(request.id);
+
     case 'searchBooks':
       return searchBooks(request.query);
 
@@ -61,13 +64,6 @@ function handleRequest(request) {
 
     case 'returnBook':
       return returnBook(request.loanId);
-
-    // Google Books API
-    case 'searchGoogleBooks':
-      return searchGoogleBooks(request.query);
-
-    case 'getGoogleBookById':
-      return getGoogleBookById(request.volumeId);
 
     default:
       throw new Error('Unknown action: ' + action);
