@@ -1,5 +1,5 @@
 import { config } from '../config';
-import type { Book, Loan, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolume } from '../types';
+import type { Book, Loan, Review, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolume } from '../types';
 
 // Google Books API
 const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
@@ -173,5 +173,36 @@ export const loansApi = {
    */
   async return(loanId: string): Promise<Loan> {
     return callGasApi<Loan>('returnBook', { loanId });
+  },
+};
+
+// レビューAPI
+export const reviewsApi = {
+  /**
+   * 書籍のレビュー一覧を取得
+   */
+  async getByBookId(bookId: string): Promise<Review[]> {
+    return callGasApi<Review[]>('getReviewsByBookId', { bookId });
+  },
+
+  /**
+   * 自分のレビューを取得
+   */
+  async getMyReview(bookId: string): Promise<Review | null> {
+    return callGasApi<Review | null>('getMyReview', { bookId });
+  },
+
+  /**
+   * レビューを作成または更新
+   */
+  async createOrUpdate(review: { bookId: string; rating: number; comment: string }): Promise<Review> {
+    return callGasApi<Review>('createOrUpdateReview', { review });
+  },
+
+  /**
+   * レビューを削除
+   */
+  async delete(id: string): Promise<void> {
+    return callGasApi<void>('deleteReview', { id });
   },
 };

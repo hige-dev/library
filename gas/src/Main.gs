@@ -44,7 +44,7 @@ function handleRequest(request) {
   switch (action) {
     // 書籍API
     case 'getBooks':
-      return getBooks();
+      return getBooksWithReviewStats();
 
     case 'getBookById':
       return getBookById(request.id);
@@ -83,6 +83,20 @@ function handleRequest(request) {
     case 'returnBook':
       return returnBook(request.loanId);
 
+    // レビューAPI
+    case 'getReviewsByBookId':
+      return getReviewsByBookId(request.bookId);
+
+    case 'getMyReview':
+      return getReviewByBookIdAndUser(request.bookId, request.authenticatedUser.email);
+
+    case 'createOrUpdateReview':
+      return createOrUpdateReview(request.review, request.authenticatedUser.email);
+
+    case 'deleteReview':
+      deleteReview(request.id, request.authenticatedUser.email);
+      return null;
+
     default:
       throw new Error('Unknown action: ' + action);
   }
@@ -96,6 +110,7 @@ function setupSpreadsheet() {
   // シートを作成
   getOrCreateSheet(SHEET_NAMES.BOOKS);
   getOrCreateSheet(SHEET_NAMES.LOANS);
+  getOrCreateSheet(SHEET_NAMES.REVIEWS);
 
   console.log('セットアップ完了');
 }

@@ -12,6 +12,8 @@ export interface Book {
   createdBy: string;
   genre: string;
   titleKana: string;
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 // 貸出データ型
@@ -21,6 +23,17 @@ export interface Loan {
   borrower: string;
   borrowedAt: string;
   returnedAt: string | null;
+}
+
+// レビューデータ型
+export interface Review {
+  id: string;
+  bookId: string;
+  rating: number;
+  comment: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // 書籍と貸出情報を結合した型

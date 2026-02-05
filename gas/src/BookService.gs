@@ -20,6 +20,34 @@ function getBooks() {
 }
 
 /**
+ * 全書籍をレビュー統計付きで取得
+ */
+function getBooksWithReviewStats() {
+  var books = getBooks();
+  var reviewStats = getAllReviewStats();
+
+  return books.map(function(book) {
+    var stats = reviewStats[book.id] || { averageRating: 0, reviewCount: 0 };
+    return {
+      id: book.id,
+      title: book.title,
+      isbn: book.isbn,
+      authors: book.authors,
+      publisher: book.publisher,
+      publishedDate: book.publishedDate,
+      imageUrl: book.imageUrl,
+      googleBooksId: book.googleBooksId,
+      createdAt: book.createdAt,
+      createdBy: book.createdBy,
+      genre: book.genre,
+      titleKana: book.titleKana,
+      averageRating: stats.averageRating,
+      reviewCount: stats.reviewCount,
+    };
+  });
+}
+
+/**
  * 書籍を検索
  */
 function searchBooks(query) {

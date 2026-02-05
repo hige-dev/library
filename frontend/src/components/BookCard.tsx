@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { BookWithLoan } from '../types';
 import { getImageUrl } from '../config';
+import { StarRating } from './StarRating';
 
 interface BookCardProps {
   book: BookWithLoan;
@@ -35,6 +36,12 @@ export function BookCard({ book, currentUserEmail, onBorrow, onReturn }: BookCar
       <div className="book-info">
         <h3 className="book-title">{book.title}</h3>
         <p className="book-authors">{book.authors.join(', ')}</p>
+        {book.reviewCount !== undefined && book.reviewCount > 0 && (
+          <div className="book-rating">
+            <StarRating rating={Math.round(book.averageRating || 0)} readonly size="small" />
+            <span className="rating-count">({book.reviewCount})</span>
+          </div>
+        )}
         {isOnLoan && book.currentLoan && (
           <p className="loan-info">{book.currentLoan.borrower}</p>
         )}

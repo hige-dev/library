@@ -11,6 +11,7 @@ frontend/dist/
 
 # clasp
 gas/.clasp.json
+gas/.deploy-id
 
 # IDE
 .vscode/
