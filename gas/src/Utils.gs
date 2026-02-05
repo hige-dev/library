@@ -62,6 +62,8 @@ function initializeSheet(sheet, sheetName) {
     ]);
   } else if (sheetName === SHEET_NAMES.LOANS) {
     sheet.appendRow(['id', 'bookId', 'borrower', 'borrowedAt', 'returnedAt']);
+  } else if (sheetName === SHEET_NAMES.REVIEWS) {
+    sheet.appendRow(['id', 'bookId', 'rating', 'comment', 'createdBy', 'createdAt', 'updatedAt']);
   }
 }
 

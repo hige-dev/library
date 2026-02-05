@@ -10,6 +10,7 @@ var SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREAD
 var SHEET_NAMES = {
   BOOKS: 'books',
   LOANS: 'loans',
+  REVIEWS: 'reviews',
 };
 
 /**
@@ -39,4 +40,17 @@ var LOAN_COLUMNS = {
   BORROWER: 2,
   BORROWED_AT: 3,
   RETURNED_AT: 4,
+};
+
+/**
+ * レビューシートのカラムインデックス（0始まり）
+ */
+var REVIEW_COLUMNS = {
+  ID: 0,
+  BOOK_ID: 1,
+  RATING: 2,
+  COMMENT: 3,
+  CREATED_BY: 4,
+  CREATED_AT: 5,
+  UPDATED_AT: 6,
 };
