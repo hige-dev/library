@@ -36,6 +36,12 @@ export interface Review {
   updatedAt: string;
 }
 
+// レビュー（書籍情報付き）
+export interface ReviewWithBook extends Review {
+  bookTitle: string;
+  bookImageUrl: string;
+}
+
 // 書籍と貸出情報を結合した型
 export interface BookWithLoan extends Book {
   currentLoan: Loan | null;

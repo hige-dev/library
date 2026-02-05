@@ -37,6 +37,46 @@ function getAllReviewStats() {
 }
 
 /**
+ * 全レビューを書籍情報付きで取得（新しい順）
+ * @returns {Array} レビュー一覧（書籍タイトル付き）
+ */
+function getAllReviewsWithBooks() {
+  var sheet = getOrCreateSheet(SHEET_NAMES.REVIEWS);
+  var data = sheet.getDataRange().getValues();
+
+  // 書籍情報を取得してマップ化
+  var books = getBooks();
+  var bookMap = {};
+  books.forEach(function(book) {
+    bookMap[book.id] = book;
+  });
+
+  var reviews = [];
+  for (var i = 1; i < data.length; i++) {
+    var review = rowToReview(data[i]);
+    var book = bookMap[review.bookId];
+    reviews.push({
+      id: review.id,
+      bookId: review.bookId,
+      bookTitle: book ? book.title : '（削除された書籍）',
+      bookImageUrl: book ? book.imageUrl : '',
+      rating: review.rating,
+      comment: review.comment,
+      createdBy: review.createdBy,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+    });
+  }
+
+  // 新しい順にソート
+  reviews.sort(function(a, b) {
+    return new Date(b.updatedAt) - new Date(a.updatedAt);
+  });
+
+  return reviews;
+}
+
+/**
  * 書籍のレビュー一覧を取得
  * @param {string} bookId - 書籍ID
  * @returns {Array} レビュー一覧

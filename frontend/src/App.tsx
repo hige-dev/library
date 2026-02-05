@@ -8,6 +8,7 @@ import {
   BookRegisterPage,
   CsvRegisterPage,
   LoanListPage,
+  ReviewListPage,
 } from './pages';
 import { config } from './config';
 import './App.css';
@@ -37,6 +38,7 @@ function AppRoutes() {
           <Route path="/register" element={<BookRegisterPage />} />
           <Route path="/register/csv" element={<CsvRegisterPage />} />
           <Route path="/loans" element={<LoanListPage />} />
+          <Route path="/reviews" element={<ReviewListPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

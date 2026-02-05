@@ -14,6 +14,7 @@ export function Header() {
           <Link to="/">書籍一覧</Link>
           <Link to="/register">書籍登録</Link>
           <Link to="/loans">貸出状況</Link>
+          <Link to="/reviews">レビュー</Link>
         </nav>
         {user && (
           <div className="user-info">

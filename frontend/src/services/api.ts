@@ -1,5 +1,5 @@
 import { config } from '../config';
-import type { Book, Loan, Review, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolume } from '../types';
+import type { Book, Loan, Review, ReviewWithBook, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolume } from '../types';
 
 // Google Books API
 const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
@@ -178,6 +178,13 @@ export const loansApi = {
 
 // レビューAPI
 export const reviewsApi = {
+  /**
+   * 全レビュー一覧を取得（書籍情報付き）
+   */
+  async getAll(): Promise<ReviewWithBook[]> {
+    return callGasApi<ReviewWithBook[]>('getAllReviews');
+  },
+
   /**
    * 書籍のレビュー一覧を取得
    */

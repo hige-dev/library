@@ -84,6 +84,9 @@ function handleRequest(request) {
       return returnBook(request.loanId);
 
     // レビューAPI
+    case 'getAllReviews':
+      return getAllReviewsWithBooks();
+
     case 'getReviewsByBookId':
       return getReviewsByBookId(request.bookId);
 
