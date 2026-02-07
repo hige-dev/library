@@ -4,10 +4,12 @@
 
 ## 機能
 
-- **書籍一覧**: 登録済み書籍の閲覧・検索・ジャンルフィルター
+- **書籍一覧**: 登録済み書籍の閲覧・検索・ジャンルフィルター・ソート
+  （登録日順・レビュー件数順・レビュー評価順）
 - **書籍登録**: タイトルからGoogle Books APIで画像・ISBN自動取得
 - **CSV一括登録**: タイトル一覧から一括登録
 - **貸出管理**: 借りた人・貸出日・返却日を記録
+- **レビュー**: 書籍への星評価（5段階）・コメント投稿・レビュー一覧
 
 ## 技術構成
 
@@ -62,7 +64,7 @@ library/
 
 1. 新規スプレッドシートを作成
 2. URLからスプレッドシートIDをコピー（`/d/` と `/edit` の間の文字列）
-3. 以下の2つのシートを作成し、1行目にヘッダーを設定:
+3. 以下の3つのシートを作成し、1行目にヘッダーを設定:
 
 **booksシート:**
 ```
@@ -72,6 +74,11 @@ id,title,isbn,authors,publisher,publishedDate,imageUrl,googleBooksId,createdAt,c
 **loansシート:**
 ```
 id,bookId,borrower,borrowedAt,returnedAt
+```
+
+**reviewsシート:**
+```
+id,bookId,rating,comment,createdBy,createdAt,updatedAt
 ```
 
 ### 3. GASのセットアップ
