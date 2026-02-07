@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Book, Loan, BookWithLoan } from '../types';
 
 type FilterType = 'all' | 'available' | 'onLoan';
+type SortType = 'createdAt' | 'reviewCount' | 'rating';
 
 export function BookListPage() {
   const { user } = useAuth();
@@ -13,6 +14,7 @@ export function BookListPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
   const [genreFilter, setGenreFilter] = useState<string>('');
+  const [sortBy, setSortBy] = useState<SortType>('createdAt');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,8 +88,22 @@ export function BookListPage() {
       );
     }
 
+    // ソート
+    result = [...result].sort((a, b) => {
+      switch (sortBy) {
+        case 'createdAt':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'reviewCount':
+          return (b.reviewCount || 0) - (a.reviewCount || 0);
+        case 'rating':
+          return (b.averageRating || 0) - (a.averageRating || 0);
+        default:
+          return 0;
+      }
+    });
+
     return result;
-  }, [booksWithLoans, searchQuery, filter, genreFilter]);
+  }, [booksWithLoans, searchQuery, filter, genreFilter, sortBy]);
 
   const handleBorrow = async (bookId: string) => {
     if (!user) return;
@@ -171,6 +187,18 @@ export function BookListPage() {
             </select>
           </div>
         )}
+
+        <div className="sort-filter">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortType)}
+            className="genre-select"
+          >
+            <option value="createdAt">登録日が新しい順</option>
+            <option value="reviewCount">レビュー件数が多い順</option>
+            <option value="rating">レビュー評価が高い順</option>
+          </select>
+        </div>
       </div>
 
       {filteredBooks.length === 0 ? (

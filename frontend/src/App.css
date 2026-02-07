@@ -640,7 +640,8 @@ body {
   border-color: var(--primary-color);
 }
 
-.genre-filter {
+.genre-filter,
+.sort-filter {
   margin-bottom: 1.5rem;
 }
 
