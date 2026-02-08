@@ -12,7 +12,7 @@
 
 ## 前提条件
 
-- Node.js 20+
+- Node.js 24+
 - AWS CLI（設定済み）
 - AWS SAM CLI
 - Google Cloud プロジェクト

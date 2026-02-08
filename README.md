@@ -43,7 +43,7 @@ library/
 
 ### 前提条件
 
-- Node.js 20+
+- Node.js 24+
 - npm
 - AWS CLI（設定済み）
 - AWS SAM CLI
