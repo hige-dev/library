@@ -15,8 +15,8 @@
 
 | 層 | 本番 | 開発 |
 |----|------|------|
-| フロントエンド | React + TypeScript (S3+CF) | React + TypeScript (Vite) |
-| バックエンド | Google Apps Script | 同左 |
+| フロントエンド | React + TypeScript (S3+CloudFront) | React + TypeScript (Vite) |
+| バックエンド | AWS Lambda (Function URL + CloudFront OAC) | 同左（SAM CLI） |
 | データベース | Google スプレッドシート | 同左（開発用シート） |
 | 認証 | Google Identity Services | 同左 |
 
@@ -33,8 +33,9 @@ library/
 │   │   └── types/      # 型定義
 │   └── public/
 │       └── images/     # 開発用画像
-├── gas/                # Google Apps Script バックエンド
-│   └── src/
+├── lambda/             # Lambda バックエンド
+│   ├── src/
+│   └── template.yaml   # SAM テンプレート
 └── README.md
 ```
 
@@ -42,8 +43,10 @@ library/
 
 ### 前提条件
 
-- Node.js 18+
-- npm または yarn
+- Node.js 20+
+- npm
+- AWS CLI（設定済み）
+- AWS SAM CLI
 - Googleアカウント
 
 ### 1. Google Cloud Console の設定
@@ -57,7 +60,7 @@ library/
    - 承認済みJavaScript生成元:
      - `http://localhost:5173`（開発用）
      - `https://your-domain.com`（本番用）
-   - 承認済みリダイレクトURI: 空でOK
+   - 承認済みリダイレクトURI: 空でOK（ポップアップモードのため不要）
 4. クライアントIDをメモ
 
 ### 2. Google スプレッドシートの準備
@@ -81,35 +84,16 @@ id,bookId,borrower,borrowedAt,returnedAt
 id,bookId,rating,comment,createdBy,createdAt,updatedAt
 ```
 
-### 3. GASのセットアップ
+### 3. Lambda バックエンドのセットアップ
 
-詳細は [gas/README.md](./gas/README.md) を参照。
+詳細は [lambda/README.md](./lambda/README.md) を参照。
 
 ```bash
-cd gas
-
-# clasp をインストール（未インストールの場合）
-npm install -g @google/clasp
-
-# Googleアカウントでログイン
-clasp login
-
-# GASプロジェクトを作成
-clasp create --type webapp --title "Library API"
-
-# コードをプッシュ
-clasp push
-
-# スクリプトエディタを開く
-clasp open
+cd lambda
+npm install
+npm run build
+sam deploy --guided
 ```
-
-スクリプトエディタで:
-1. 「プロジェクトの設定」→「スクリプト プロパティ」→ `SPREADSHEET_ID` を追加
-2. 「デプロイ」→「新しいデプロイ」→ ウェブアプリ
-   - 実行ユーザー: 自分
-   - アクセスできるユーザー: **全員**
-3. デプロイURLをコピー
 
 ### 4. フロントエンドのセットアップ
 
@@ -125,7 +109,7 @@ cp .env.example .env.development
 
 ```
 VITE_GOOGLE_CLIENT_ID=<OAuthクライアントID>
-VITE_GAS_API_URL=<GAS Web App URL>
+VITE_API_URL=<CloudFront経由のAPI URL>
 VITE_ALLOWED_DOMAINS=              # 空欄で全ドメイン許可
 VITE_GOOGLE_BOOKS_API_KEY=<Google Books APIキー>  # 任意（レート制限対策）
 ```
@@ -141,6 +125,14 @@ http://localhost:5173 でアクセスできます。
 
 ## 本番デプロイ
 
+### Lambda バックエンド
+
+```bash
+cd lambda
+npm run build
+sam deploy
+```
+
 ### フロントエンド (AWS S3 + CloudFront)
 
 ```bash
@@ -152,13 +144,6 @@ cp .env.example .env.production
 
 npm run build
 # dist/ フォルダをS3にアップロード
-```
-
-### GAS
-
-```bash
-cd gas
-clasp deploy --description "Production v1.0.0"
 ```
 
 ## 開発時の注意点
@@ -173,10 +158,6 @@ clasp deploy --description "Production v1.0.0"
 
 - 現在はGoogle Books APIのURLをそのまま使用
 - 本番で大規模利用する場合はS3への保存を検討
-
-### CORS
-
-GASはCORSヘッダーを自動で付与しないため、フロントエンドからの呼び出しは `Content-Type: text/plain` で行います。
 
 ## ライセンス
 

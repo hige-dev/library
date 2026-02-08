@@ -128,6 +128,7 @@ aws lambda add-permission \
 | `SERVICE_ACCOUNT_KEY_PARAM` | Parameter Store名 |
 | `ALLOWED_DOMAINS` | 許可ドメイン（カンマ区切り、空で全許可） |
 | `GOOGLE_CLIENT_ID` | Google OAuthクライアントID（ID Token検証用） |
+| `ALLOWED_ORIGIN` | CORSで許可するオリジン（デフォルト: `*`） |
 
 ## 開発
 
