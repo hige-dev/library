@@ -17,6 +17,7 @@ import {
   createOrUpdateReview,
   deleteReview,
 } from './reviewService';
+import { getUserRole, type Role } from './userService';
 
 function getAllowedOrigin(): string {
   return process.env.ALLOWED_ORIGIN || '*';
@@ -75,7 +76,8 @@ function requireArray(obj: Record<string, unknown>, key: string): Record<string,
 
 async function handleRequest(
   request: Record<string, unknown>,
-  userEmail: string
+  userEmail: string,
+  role: Role
 ): Promise<unknown> {
   const action = request.action;
   if (typeof action !== 'string' || action.length === 0) {
@@ -83,6 +85,10 @@ async function handleRequest(
   }
 
   switch (action) {
+    // ユーザーAPI
+    case 'getMyRole':
+      return { role };
+
     // 書籍API
     case 'getBooks':
       return getBooksWithReviewStats();
@@ -106,7 +112,7 @@ async function handleRequest(
     }
 
     case 'deleteBook':
-      await deleteBook(requireString(request, 'id'), userEmail);
+      await deleteBook(requireString(request, 'id'), role);
       return null;
 
     // 貸出API
@@ -120,7 +126,7 @@ async function handleRequest(
       return borrowBook(requireString(request, 'bookId'), userEmail);
 
     case 'returnBook':
-      return returnBook(requireString(request, 'loanId'), userEmail);
+      return returnBook(requireString(request, 'loanId'), userEmail, role);
 
     // レビューAPI
     case 'getAllReviews':
@@ -139,7 +145,7 @@ async function handleRequest(
       );
 
     case 'deleteReview':
-      await deleteReview(requireString(request, 'id'), userEmail);
+      await deleteReview(requireString(request, 'id'), userEmail, role);
       return null;
 
     default:
@@ -173,7 +179,8 @@ export async function handler(
       return errorResponse(401, auth.error || 'Unauthorized');
     }
 
-    const result = await handleRequest(body, auth.user.email);
+    const role = await getUserRole(auth.user.email);
+    const result = await handleRequest(body, auth.user.email, role);
     return successResponse(result);
   } catch (error) {
     if (error instanceof AppError) {

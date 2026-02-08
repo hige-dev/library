@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { getSheetData, appendRow, updateRow, deleteRow } from './sheets';
 import { getBooks } from './bookService';
 import { AppError } from './errors';
+import type { Role } from './userService';
 
 const SHEET_NAME = 'reviews';
 
@@ -177,11 +178,11 @@ export async function createOrUpdateReview(
   return review;
 }
 
-export async function deleteReview(id: string, userEmail: string): Promise<void> {
+export async function deleteReview(id: string, userEmail: string, role: Role): Promise<void> {
   const data = await getSheetData(SHEET_NAME);
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][COL.ID]) === id) {
-      if (String(data[i][COL.CREATED_BY]) !== userEmail) {
+      if (role !== 'admin' && String(data[i][COL.CREATED_BY]) !== userEmail) {
         throw new AppError('自分のレビューのみ削除できます', 403);
       }
       await deleteRow(SHEET_NAME, i + 1);

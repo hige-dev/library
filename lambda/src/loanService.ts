@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { getSheetData, appendRow, updateCell, deleteRow } from './sheets';
 import { getBookById } from './bookService';
 import { AppError } from './errors';
+import type { Role } from './userService';
 
 const SHEET_NAME = 'loans';
 
@@ -69,12 +70,12 @@ export async function borrowBook(bookId: string, borrower: string): Promise<Loan
   return loan;
 }
 
-export async function returnBook(loanId: string, userEmail: string): Promise<Loan> {
+export async function returnBook(loanId: string, userEmail: string, role: Role): Promise<Loan> {
   const data = await getSheetData(SHEET_NAME);
 
   for (let i = 1; i < data.length; i++) {
     if (data[i][COL.ID] === loanId) {
-      if (String(data[i][COL.BORROWER]) !== userEmail) {
+      if (role !== 'admin' && String(data[i][COL.BORROWER]) !== userEmail) {
         throw new AppError('自分が借りた書籍のみ返却できます', 403);
       }
       const returnedAt = new Date().toISOString();

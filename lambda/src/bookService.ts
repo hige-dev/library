@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { getSheetData, appendRow, appendRows, deleteRow } from './sheets';
 import { AppError } from './errors';
+import type { Role } from './userService';
 
 const SHEET_NAME = 'books';
 
@@ -182,13 +183,13 @@ export async function createBooks(booksData: Record<string, unknown>[]): Promise
   return createdBooks;
 }
 
-export async function deleteBook(id: string, userEmail: string): Promise<void> {
+export async function deleteBook(id: string, role: Role): Promise<void> {
+  if (role !== 'admin') {
+    throw new AppError('書籍の削除は管理者のみ可能です', 403);
+  }
   const data = await getSheetData(SHEET_NAME);
   for (let i = 1; i < data.length; i++) {
     if (data[i][COL.ID] === id) {
-      if (String(data[i][COL.CREATED_BY]) !== userEmail) {
-        throw new AppError('自分が登録した書籍のみ削除できます', 403);
-      }
       await deleteRow(SHEET_NAME, i + 1);
       return;
     }
