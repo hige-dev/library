@@ -21,19 +21,33 @@ export function getAuthToken(): string | null {
   return authToken;
 }
 
+/**
+ * リクエストボディのSHA-256ハッシュを計算
+ * CloudFront OACがLambda Function URLへのPOSTリクエストを署名するために必要
+ */
+async function computeSha256(body: string): Promise<string> {
+  const data = new TextEncoder().encode(body);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 // API呼び出し用のヘルパー
 async function callApi<T>(action: string, params: Record<string, unknown> = {}): Promise<T> {
   if (!authToken) {
     throw new Error('認証が必要です');
   }
 
+  const body = JSON.stringify({ action, ...params });
+  const bodyHash = await computeSha256(body);
+
   const response = await fetch(config.apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
+      'X-Auth-Token': authToken,
+      'x-amz-content-sha256': bodyHash,
     },
-    body: JSON.stringify({ action, ...params }),
+    body,
   });
 
   if (!response.ok) {

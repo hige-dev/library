@@ -114,7 +114,7 @@ export async function handler(
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token',
       },
     };
   }
@@ -126,9 +126,8 @@ export async function handler(
   try {
     const body = JSON.parse(event.body || '{}');
 
-    // Authorization ヘッダーから ID Token を取得
-    const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '');
+    // X-Auth-Token ヘッダーから ID Token を取得
+    const token = event.headers?.['x-auth-token'] || '';
 
     const auth = await authenticateRequest(token);
     if (auth.error || !auth.user) {
