@@ -1,5 +1,5 @@
 import { config } from '../config';
-import type { Book, Loan, Review, ReviewWithBook, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolume } from '../types';
+import type { Book, Loan, Review, ReviewWithBook, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolume, Role } from '../types';
 
 // Google Books API
 const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
@@ -114,6 +114,17 @@ export async function getGoogleBookById(volumeId: string): Promise<GoogleBooksVo
 
   return response.json();
 }
+
+// ユーザーAPI
+export const usersApi = {
+  /**
+   * 自分のロールを取得
+   */
+  async getMyRole(): Promise<Role> {
+    const result = await callApi<{ role: Role }>('getMyRole');
+    return result.role;
+  },
+};
 
 // 書籍API
 export const booksApi = {

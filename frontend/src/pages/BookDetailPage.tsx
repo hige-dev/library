@@ -169,6 +169,8 @@ export function BookDetailPage() {
 
   const isOnLoan = currentLoan !== null;
   const isBorrowedByMe = currentLoan?.borrower === user?.email;
+  const isAdmin = user?.role === 'admin';
+  const canReturn = isBorrowedByMe || isAdmin;
 
   return (
     <div className="book-detail-page">
@@ -232,7 +234,7 @@ export function BookDetailPage() {
               </button>
             )}
 
-            {isBorrowedByMe && (
+            {isOnLoan && canReturn && (
               <button
                 onClick={handleReturn}
                 disabled={isProcessing}
@@ -242,13 +244,15 @@ export function BookDetailPage() {
               </button>
             )}
 
-            <button
-              onClick={handleDelete}
-              disabled={isProcessing || isOnLoan}
-              className="btn btn-danger"
-            >
-              削除
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleDelete}
+                disabled={isProcessing || isOnLoan}
+                className="btn btn-danger"
+              >
+                削除
+              </button>
+            )}
           </div>
         </div>
       </div>

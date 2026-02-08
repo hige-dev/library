@@ -79,10 +79,13 @@ export interface ApiResponse<T> {
 }
 
 // ユーザー情報型
+export type Role = 'admin' | 'user';
+
 export interface User {
   email: string;
   name: string;
   picture?: string;
+  role: Role;
 }
 
 // 環境設定型

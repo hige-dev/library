@@ -6,13 +6,15 @@ import { StarRating } from './StarRating';
 interface BookCardProps {
   book: BookWithLoan;
   currentUserEmail?: string;
+  isAdmin?: boolean;
   onBorrow?: () => void;
   onReturn?: () => void;
 }
 
-export function BookCard({ book, currentUserEmail, onBorrow, onReturn }: BookCardProps) {
+export function BookCard({ book, currentUserEmail, isAdmin, onBorrow, onReturn }: BookCardProps) {
   const isOnLoan = book.currentLoan !== null;
   const isBorrowedByMe = book.currentLoan?.borrower === currentUserEmail;
+  const canReturn = isBorrowedByMe || isAdmin;
 
   const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
     e.preventDefault();
@@ -55,7 +57,7 @@ export function BookCard({ book, currentUserEmail, onBorrow, onReturn }: BookCar
             借りる
           </button>
         )}
-        {isBorrowedByMe && onReturn && (
+        {isOnLoan && canReturn && onReturn && (
           <button
             className="btn btn-sm btn-success"
             onClick={(e) => handleButtonClick(e, onReturn)}
