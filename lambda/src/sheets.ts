@@ -102,6 +102,17 @@ export async function updateRow(
   });
 }
 
+/** カラムインデックス（0始まり）をスプレッドシートのカラム文字に変換（例: 0→A, 25→Z, 26→AA） */
+function colIndexToLetter(index: number): string {
+  let result = '';
+  let n = index;
+  while (n >= 0) {
+    result = String.fromCharCode(65 + (n % 26)) + result;
+    n = Math.floor(n / 26) - 1;
+  }
+  return result;
+}
+
 /**
  * シートの特定セルを更新
  */
@@ -112,7 +123,7 @@ export async function updateCell(
   value: unknown
 ): Promise<void> {
   const sheets = await getSheetsClient();
-  const colLetter = String.fromCharCode(65 + colIndex);
+  const colLetter = colIndexToLetter(colIndex);
   await sheets.spreadsheets.values.update({
     spreadsheetId: getSpreadsheetId(),
     range: `${sheetName}!${colLetter}${rowIndex}`,

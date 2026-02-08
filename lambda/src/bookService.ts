@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { getSheetData, appendRow, appendRows, deleteRow } from './sheets';
+import { AppError } from './errors';
 
 const SHEET_NAME = 'books';
 
@@ -124,7 +125,7 @@ export async function createBook(bookData: Record<string, unknown>): Promise<Boo
     String(bookData.googleBooksId || '')
   );
   if (duplicate) {
-    throw new Error('この書籍は既に登録されています: ' + duplicate.title);
+    throw new AppError('この書籍は既に登録されています: ' + duplicate.title);
   }
 
   const book: Book = {
@@ -181,13 +182,16 @@ export async function createBooks(booksData: Record<string, unknown>[]): Promise
   return createdBooks;
 }
 
-export async function deleteBook(id: string): Promise<void> {
+export async function deleteBook(id: string, userEmail: string): Promise<void> {
   const data = await getSheetData(SHEET_NAME);
   for (let i = 1; i < data.length; i++) {
     if (data[i][COL.ID] === id) {
+      if (String(data[i][COL.CREATED_BY]) !== userEmail) {
+        throw new AppError('自分が登録した書籍のみ削除できます', 403);
+      }
       await deleteRow(SHEET_NAME, i + 1);
       return;
     }
   }
-  throw new Error('書籍が見つかりません');
+  throw new AppError('書籍が見つかりません', 404);
 }

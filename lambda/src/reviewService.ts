@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { getSheetData, appendRow, updateRow, deleteRow } from './sheets';
 import { getBooks } from './bookService';
+import { AppError } from './errors';
 
 const SHEET_NAME = 'reviews';
 
@@ -134,6 +135,11 @@ export async function createOrUpdateReview(
   reviewData: { bookId: string; rating: number; comment: string },
   userEmail: string
 ): Promise<Review> {
+  const rating = Number(reviewData.rating);
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    throw new AppError('評価は1〜5の整数で指定してください');
+  }
+
   const data = await getSheetData(SHEET_NAME);
   const now = new Date().toISOString();
 
@@ -146,7 +152,7 @@ export async function createOrUpdateReview(
       const review: Review = {
         id: String(data[i][COL.ID]),
         bookId: reviewData.bookId,
-        rating: reviewData.rating,
+        rating,
         comment: reviewData.comment,
         createdBy: userEmail,
         createdAt: String(data[i][COL.CREATED_AT]),
@@ -161,7 +167,7 @@ export async function createOrUpdateReview(
   const review: Review = {
     id: randomUUID(),
     bookId: reviewData.bookId,
-    rating: reviewData.rating,
+    rating,
     comment: reviewData.comment,
     createdBy: userEmail,
     createdAt: now,
@@ -176,11 +182,11 @@ export async function deleteReview(id: string, userEmail: string): Promise<void>
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][COL.ID]) === id) {
       if (String(data[i][COL.CREATED_BY]) !== userEmail) {
-        throw new Error('自分のレビューのみ削除できます');
+        throw new AppError('自分のレビューのみ削除できます', 403);
       }
       await deleteRow(SHEET_NAME, i + 1);
       return;
     }
   }
-  throw new Error('レビューが見つかりません');
+  throw new AppError('レビューが見つかりません', 404);
 }

@@ -17,6 +17,10 @@ Parameters:
   GoogleClientId:
     Type: String
     Description: Google OAuth Client ID for ID Token verification
+  AllowedOrigin:
+    Type: String
+    Description: Allowed CORS origin (e.g. https://your-domain.com)
+    Default: '*'
 
 Globals:
   Function:
@@ -38,7 +42,9 @@ Resources:
           SERVICE_ACCOUNT_KEY_PARAM: !Ref ServiceAccountKeyParam
           ALLOWED_DOMAINS: !Ref AllowedDomains
           GOOGLE_CLIENT_ID: !Ref GoogleClientId
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
       Policies:
+        # ServiceAccountKeyParam と同期すること（先頭の / は不要）
         - SSMParameterReadPolicy:
             ParameterName: library/google-service-account-key
 

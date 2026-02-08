@@ -1,4 +1,5 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { AppError } from './errors';
 import { authenticateRequest } from './auth';
 import {
   getBooksWithReviewStats,
@@ -17,10 +18,22 @@ import {
   deleteReview,
 } from './reviewService';
 
+function getAllowedOrigin(): string {
+  return process.env.ALLOWED_ORIGIN || '*';
+}
+
+function corsHeaders(): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': getAllowedOrigin(),
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token, x-amz-content-sha256',
+  };
+}
+
 function jsonResponse(statusCode: number, body: unknown): APIGatewayProxyResultV2 {
   return {
     statusCode,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders() },
     body: JSON.stringify(body),
   };
 }
@@ -33,11 +46,41 @@ function errorResponse(statusCode: number, error: string): APIGatewayProxyResult
   return jsonResponse(statusCode, { success: false, error });
 }
 
+/** リクエストから必須の文字列パラメータを取得 */
+function requireString(obj: Record<string, unknown>, key: string): string {
+  const value = obj[key];
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new AppError(`${key} は必須です`);
+  }
+  return value;
+}
+
+/** リクエストから必須のオブジェクトパラメータを取得 */
+function requireObject(obj: Record<string, unknown>, key: string): Record<string, unknown> {
+  const value = obj[key];
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new AppError(`${key} は必須です`);
+  }
+  return value as Record<string, unknown>;
+}
+
+/** リクエストから必須の配列パラメータを取得 */
+function requireArray(obj: Record<string, unknown>, key: string): Record<string, unknown>[] {
+  const value = obj[key];
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new AppError(`${key} は必須です`);
+  }
+  return value as Record<string, unknown>[];
+}
+
 async function handleRequest(
   request: Record<string, unknown>,
   userEmail: string
 ): Promise<unknown> {
-  const action = request.action as string;
+  const action = request.action;
+  if (typeof action !== 'string' || action.length === 0) {
+    throw new AppError('action は必須です');
+  }
 
   switch (action) {
     // 書籍API
@@ -45,25 +88,25 @@ async function handleRequest(
       return getBooksWithReviewStats();
 
     case 'getBookById':
-      return getBookById(request.id as string);
+      return getBookById(requireString(request, 'id'));
 
     case 'searchBooks':
-      return searchBooks(request.query as string);
+      return searchBooks(requireString(request, 'query'));
 
     case 'createBook': {
-      const book = request.book as Record<string, unknown>;
+      const book = requireObject(request, 'book');
       book.createdBy = userEmail;
       return createBook(book);
     }
 
     case 'createBooks': {
-      const books = request.books as Record<string, unknown>[];
+      const books = requireArray(request, 'books');
       books.forEach((b) => { b.createdBy = userEmail; });
       return createBooks(books);
     }
 
     case 'deleteBook':
-      await deleteBook(request.id as string);
+      await deleteBook(requireString(request, 'id'), userEmail);
       return null;
 
     // 貸出API
@@ -71,36 +114,36 @@ async function handleRequest(
       return getLoans();
 
     case 'getLoanByBookId':
-      return getLoanByBookId(request.bookId as string);
+      return getLoanByBookId(requireString(request, 'bookId'));
 
     case 'borrowBook':
-      return borrowBook(request.bookId as string, userEmail);
+      return borrowBook(requireString(request, 'bookId'), userEmail);
 
     case 'returnBook':
-      return returnBook(request.loanId as string);
+      return returnBook(requireString(request, 'loanId'), userEmail);
 
     // レビューAPI
     case 'getAllReviews':
       return getAllReviewsWithBooks();
 
     case 'getReviewsByBookId':
-      return getReviewsByBookId(request.bookId as string);
+      return getReviewsByBookId(requireString(request, 'bookId'));
 
     case 'getMyReview':
-      return getReviewByBookIdAndUser(request.bookId as string, userEmail);
+      return getReviewByBookIdAndUser(requireString(request, 'bookId'), userEmail);
 
     case 'createOrUpdateReview':
       return createOrUpdateReview(
-        request.review as { bookId: string; rating: number; comment: string },
+        requireObject(request, 'review') as { bookId: string; rating: number; comment: string },
         userEmail
       );
 
     case 'deleteReview':
-      await deleteReview(request.id as string, userEmail);
+      await deleteReview(requireString(request, 'id'), userEmail);
       return null;
 
     default:
-      throw new Error('Unknown action: ' + action);
+      throw new AppError('不明なアクション: ' + action);
   }
 }
 
@@ -111,11 +154,7 @@ export async function handler(
   if (event.requestContext.http.method === 'OPTIONS') {
     return {
       statusCode: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token',
-      },
+      headers: corsHeaders(),
     };
   }
 
@@ -137,8 +176,10 @@ export async function handler(
     const result = await handleRequest(body, auth.user.email);
     return successResponse(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('API Error:', message);
-    return errorResponse(400, message);
+    if (error instanceof AppError) {
+      return errorResponse(error.statusCode, error.message);
+    }
+    console.error('Internal Error:', error);
+    return errorResponse(500, 'サーバーエラーが発生しました');
   }
 }

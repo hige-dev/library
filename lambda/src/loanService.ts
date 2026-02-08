@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { getSheetData, appendRow, updateCell, deleteRow } from './sheets';
 import { getBookById } from './bookService';
+import { AppError } from './errors';
 
 const SHEET_NAME = 'loans';
 
@@ -48,12 +49,12 @@ export async function getLoanByBookId(bookId: string): Promise<Loan | null> {
 export async function borrowBook(bookId: string, borrower: string): Promise<Loan> {
   const existingLoan = await getLoanByBookId(bookId);
   if (existingLoan) {
-    throw new Error('この書籍は既に貸出中です');
+    throw new AppError('この書籍は既に貸出中です');
   }
 
   const book = await getBookById(bookId);
   if (!book) {
-    throw new Error('書籍が見つかりません');
+    throw new AppError('書籍が見つかりません', 404);
   }
 
   const loan: Loan = {
@@ -68,11 +69,14 @@ export async function borrowBook(bookId: string, borrower: string): Promise<Loan
   return loan;
 }
 
-export async function returnBook(loanId: string): Promise<Loan> {
+export async function returnBook(loanId: string, userEmail: string): Promise<Loan> {
   const data = await getSheetData(SHEET_NAME);
 
   for (let i = 1; i < data.length; i++) {
     if (data[i][COL.ID] === loanId) {
+      if (String(data[i][COL.BORROWER]) !== userEmail) {
+        throw new AppError('自分が借りた書籍のみ返却できます', 403);
+      }
       const returnedAt = new Date().toISOString();
       await updateCell(SHEET_NAME, i + 1, COL.RETURNED_AT, returnedAt);
 
@@ -82,5 +86,5 @@ export async function returnBook(loanId: string): Promise<Loan> {
     }
   }
 
-  throw new Error('貸出記録が見つかりません');
+  throw new AppError('貸出記録が見つかりません', 404);
 }
