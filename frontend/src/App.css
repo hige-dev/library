@@ -246,6 +246,41 @@ body {
   gap: 1.5rem;
 }
 
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.15s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: var(--gray-100);
+}
+
+.pagination-btn.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Book Card */
 .book-card {
   display: flex;
