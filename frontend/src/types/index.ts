@@ -90,7 +90,7 @@ export interface Config {
   imageStorage: 'local' | 's3';
   imageBaseUrl: string;
   googleClientId: string;
-  gasApiUrl: string;
+  apiUrl: string;
   allowedDomains: string[];
   googleBooksApiKey: string;
 }

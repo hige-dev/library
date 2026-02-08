@@ -4,7 +4,7 @@ export const config: Config = {
   imageStorage: (import.meta.env.VITE_IMAGE_STORAGE as 'local' | 's3') || 'local',
   imageBaseUrl: import.meta.env.VITE_IMAGE_BASE_URL || '/images',
   googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
-  gasApiUrl: import.meta.env.VITE_GAS_API_URL || '',
+  apiUrl: import.meta.env.VITE_API_URL || '',
   allowedDomains: (import.meta.env.VITE_ALLOWED_DOMAINS || '').split(',').filter(Boolean),
   googleBooksApiKey: import.meta.env.VITE_GOOGLE_BOOKS_API_KEY || '',
 };
