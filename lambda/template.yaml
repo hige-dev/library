@@ -40,7 +40,7 @@ Resources:
           GOOGLE_CLIENT_ID: !Ref GoogleClientId
       Policies:
         - SSMParameterReadPolicy:
-            ParameterName: !Sub "${ServiceAccountKeyParam}"
+            ParameterName: library/google-service-account-key
 
 Outputs:
   FunctionUrl:
