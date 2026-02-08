@@ -84,6 +84,13 @@ id,bookId,borrower,borrowedAt,returnedAt
 id,bookId,rating,comment,createdBy,createdAt,updatedAt
 ```
 
+**usersシート:**
+```
+email,role,createdAt
+```
+- `role`: `admin` または `user`
+- 管理者のみ登録すればOK（未登録ユーザーは `user` として扱われる）
+
 ### 3. Lambda バックエンドのセットアップ
 
 詳細は [lambda/README.md](./lambda/README.md) を参照。
