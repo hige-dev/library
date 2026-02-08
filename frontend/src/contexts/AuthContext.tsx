@@ -109,11 +109,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem(TOKEN_KEY);
   }, []);
 
-  // トークンが変わった時にapi.tsに設定
-  useEffect(() => {
-    setAuthToken(token);
-  }, [token]);
-
   return (
     <AuthContext.Provider value={{ user, token, isLoading, error, login, logout }}>
       {children}
