@@ -465,6 +465,65 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.register-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.register-tab {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--gray-500);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.register-tab:hover {
+  color: var(--gray-700);
+}
+
+.register-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.manual-form {
+  max-width: 500px;
+}
+
+.manual-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.manual-form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--gray-700);
+}
+
+.manual-form input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.manual-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
 .search-form {
   display: flex;
   align-items: center;
