@@ -6,8 +6,8 @@
 
 - **書籍一覧**: 登録済み書籍の閲覧・検索・ジャンルフィルター・ソート
   （登録日順・レビュー件数順・レビュー評価順）
-- **書籍登録**: タイトルからGoogle Books APIで画像・ISBN自動取得
-- **CSV一括登録**: タイトル一覧から一括登録
+- **書籍登録**: タイトル/ISBN検索によるGoogle Books API自動取得、または手動入力（admin のみ）
+- **CSV一括登録**: タイトル一覧から一括登録（admin のみ）
 - **貸出管理**: 借りた人・貸出日・返却日を記録
 - **レビュー**: 書籍への星評価（5段階）・コメント投稿・レビュー一覧
 
@@ -36,6 +36,7 @@ library/
 ├── lambda/             # Lambda バックエンド
 │   ├── src/
 │   └── template.yaml   # SAM テンプレート
+├── scripts/            # デプロイスクリプト
 └── README.md
 ```
 
@@ -132,26 +133,50 @@ http://localhost:5173 でアクセスできます。
 
 ## 本番デプロイ
 
-### Lambda バックエンド
+### デプロイスクリプト
 
 ```bash
-cd lambda
-npm run build
-sam deploy
+# Lambda バックエンド（ビルド＆デプロイ）
+./scripts/deploy-backend.sh
+
+# フロントエンド（ビルド＆S3アップロード＆CloudFrontキャッシュ無効化）
+./scripts/deploy-frontend.sh <S3バケット名> <CloudFront Distribution ID> [S3プレフィックス]
 ```
 
-### フロントエンド (AWS S3 + CloudFront)
+### 手動デプロイ
 
 ```bash
-cd frontend
+# Lambda
+cd lambda && npm run build && sam deploy
 
-# 本番用環境変数を設定
+# フロントエンド
+cd frontend && npm run build
+aws s3 sync dist/ s3://<S3バケット名> --delete
+aws cloudfront create-invalidation --distribution-id <Distribution ID> --paths "/*"
+```
+
+### 初回デプロイ時
+
+```bash
+# フロントエンド本番用環境変数を設定
+cd frontend
 cp .env.example .env.production
 # .env.production を編集
-
-npm run build
-# dist/ フォルダをS3にアップロード
 ```
+
+## 権限マトリックス
+
+| 操作 | user | admin |
+|------|------|-------|
+| 書籍閲覧・検索 | o | o |
+| 書籍登録 | x | o |
+| 書籍削除 | x | o |
+| 貸出（借りる） | o | o |
+| 返却 | 自分のみ | 全員分 |
+| レビュー投稿・編集 | o | o |
+| レビュー削除 | 自分のみ | 全員分 |
+
+未登録ユーザーは `user` として扱われます。
 
 ## 開発時の注意点
 
