@@ -100,12 +100,14 @@ async function handleRequest(
       return searchBooks(requireString(request, 'query'));
 
     case 'createBook': {
+      if (role !== 'admin') throw new AppError('書籍の登録は管理者のみ可能です', 403);
       const book = requireObject(request, 'book');
       book.createdBy = userEmail;
       return createBook(book);
     }
 
     case 'createBooks': {
+      if (role !== 'admin') throw new AppError('書籍の登録は管理者のみ可能です', 403);
       const books = requireArray(request, 'books');
       books.forEach((b) => { b.createdBy = userEmail; });
       return createBooks(books);

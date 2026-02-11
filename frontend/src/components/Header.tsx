@@ -12,7 +12,7 @@ export function Header() {
         </Link>
         <nav className="nav">
           <Link to="/">書籍一覧</Link>
-          <Link to="/register">書籍登録</Link>
+          {user?.role === 'admin' && <Link to="/register">書籍登録</Link>}
           <Link to="/loans">貸出状況</Link>
           <Link to="/reviews">レビュー</Link>
         </nav>
