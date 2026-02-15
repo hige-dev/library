@@ -12,7 +12,7 @@ fi
 
 S3_BUCKET="$1"
 CF_DISTRIBUTION_ID="$2"
-S3_PREFIX="${3:-}"
+S3_PREFIX="${3:frontend}"
 
 echo "=== フロントエンドのデプロイ ==="
 
@@ -28,11 +28,18 @@ else
 fi
 
 echo "S3にアップロード中... (${S3_DEST})"
-aws s3 sync dist/ "$S3_DEST" --delete
+# ハッシュ付きアセット: 1年キャッシュ
+aws s3 sync dist/ "$S3_DEST" --delete \
+  --exclude "index.html" \
+  --cache-control "public, max-age=31536000, immutable"
+
+# index.html: キャッシュなし（常に最新を取得）
+aws s3 cp dist/index.html "$S3_DEST/index.html" \
+  --cache-control "no-cache, no-store, must-revalidate"
 
 echo "CloudFrontキャッシュを無効化中..."
 aws cloudfront create-invalidation \
   --distribution-id "$CF_DISTRIBUTION_ID" \
-  --paths "/*"
+  --paths "/index.html"
 
 echo "=== デプロイ完了 ==="

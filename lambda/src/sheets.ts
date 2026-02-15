@@ -1,32 +1,12 @@
 import { google, sheets_v4 } from 'googleapis';
-import { GoogleAuth } from 'google-auth-library';
-import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
+import { getAuthClient } from './googleAuth';
 
 let sheetsClient: sheets_v4.Sheets | null = null;
-const ssmClient = new SSMClient({});
-
-async function getServiceAccountKey(): Promise<string> {
-  const paramName = process.env.SERVICE_ACCOUNT_KEY_PARAM || '/library/google-service-account-key';
-  const res = await ssmClient.send(
-    new GetParameterCommand({ Name: paramName, WithDecryption: true })
-  );
-  if (!res.Parameter?.Value) {
-    throw new Error(`Parameter Store "${paramName}" から値を取得できません`);
-  }
-  return res.Parameter.Value;
-}
 
 async function getSheetsClient(): Promise<sheets_v4.Sheets> {
   if (sheetsClient) return sheetsClient;
 
-  const keyJson = await getServiceAccountKey();
-  const credentials = JSON.parse(keyJson);
-  const auth = new GoogleAuth({
-    credentials,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-
-  sheetsClient = google.sheets({ version: 'v4', auth });
+  sheetsClient = google.sheets({ version: 'v4', auth: getAuthClient() });
   return sheetsClient;
 }
 

@@ -6,10 +6,22 @@ Parameters:
   SpreadsheetId:
     Type: String
     Description: Google Spreadsheet ID
-  ServiceAccountKeyParam:
+  GcpProjectNumber:
     Type: String
-    Description: Parameter Store name for Google Service Account Key
-    Default: /library/google-service-account-key
+    Description: GCP Project Number for Workload Identity Federation
+    Default: ''
+  GcpWifPoolId:
+    Type: String
+    Description: Workload Identity Pool ID
+    Default: ''
+  GcpWifProviderId:
+    Type: String
+    Description: Workload Identity Provider ID
+    Default: ''
+  GcpServiceAccountEmail:
+    Type: String
+    Description: GCP Service Account email for Sheets API access
+    Default: ''
   AllowedDomains:
     Type: String
     Description: Comma-separated list of allowed email domains
@@ -39,14 +51,13 @@ Resources:
       Environment:
         Variables:
           SPREADSHEET_ID: !Ref SpreadsheetId
-          SERVICE_ACCOUNT_KEY_PARAM: !Ref ServiceAccountKeyParam
+          GCP_PROJECT_NUMBER: !Ref GcpProjectNumber
+          GCP_WIF_POOL_ID: !Ref GcpWifPoolId
+          GCP_WIF_PROVIDER_ID: !Ref GcpWifProviderId
+          GCP_SERVICE_ACCOUNT_EMAIL: !Ref GcpServiceAccountEmail
           ALLOWED_DOMAINS: !Ref AllowedDomains
           GOOGLE_CLIENT_ID: !Ref GoogleClientId
           ALLOWED_ORIGIN: !Ref AllowedOrigin
-      Policies:
-        # ServiceAccountKeyParam と同期すること（先頭の / は不要）
-        - SSMParameterReadPolicy:
-            ParameterName: library/google-service-account-key
 
 Outputs:
   FunctionUrl:

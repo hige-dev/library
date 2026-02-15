@@ -95,5 +95,4 @@ export interface Config {
   googleClientId: string;
   apiUrl: string;
   allowedDomains: string[];
-  googleBooksApiKey: string;
 }

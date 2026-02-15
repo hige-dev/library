@@ -7,7 +7,6 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.985.0",
     "google-auth-library": "^9.0.0",
     "googleapis": "^140.0.0"
   },
