@@ -14,6 +14,49 @@
 - **貸出管理**: 借りた人・貸出日・返却日を記録
 - **レビュー**: 書籍への星評価（5段階）・コメント投稿・レビュー一覧
 
+## コスト
+
+すべてのサービスを無料枠内で運用できます。社内利用規模であれば **月額0円** です。
+
+| サービス | 無料枠 | 備考 |
+|----------|--------|------|
+| AWS Lambda | 月100万リクエスト | 社内利用では到達しない |
+| Amazon S3 | 5GB | 静的ファイルのみ、数MB程度 |
+| Amazon CloudFront | 月1TB転送 | |
+| Google Sheets API | 月60,000リクエスト | DBとして使用 |
+| Google Books API | 1日1,000リクエスト | 書籍登録時のみ使用 |
+| Google OAuth | 無料 | |
+| GCP Workload Identity Federation | 無料 | |
+
+RDSやDynamoDB等の有料DBを使わず、Google スプレッドシートをデータベースとして活用することで、
+固定費ゼロで運用できます。
+
+## セキュリティ
+
+認証・認可・通信のすべてのレイヤーで保護されています。
+
+### 認証・認可
+
+- **Google OAuth 認証**: ドメイン制限で組織外のアクセスを遮断
+- **ロールベース認可**: admin / user の2段階権限（書籍登録・削除は admin のみ）
+- **ID Token 検証**: Lambda側でGoogle ID Tokenの署名・有効期限・audienceを検証
+
+### インフラ
+
+- **CloudFront OAC**: S3・Lambda Function URL への直接アクセスを遮断し、
+  CloudFront経由のみに制限
+- **Lambda Function URL (AWS_IAM認証)**: IAM認証必須のため、
+  URL単体ではアクセス不可
+- **CORS制御**: 許可オリジンを制限
+
+### 秘密情報の管理
+
+- **Workload Identity Federation**: GCPサービスアカウントの鍵ファイルが不要。
+  AWS IAMロールでGCPを認証するため、鍵の漏洩リスクがない
+- **APIキーのサーバーサイド管理**: Google Books APIの呼び出しはLambda経由。
+  フロントエンドにAPIキーが露出しない
+- **環境変数による設定**: ソースコードにシークレットをハードコーディングしない
+
 ## 技術構成
 
 | 層 | 本番 | 開発 |
