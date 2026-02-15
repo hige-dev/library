@@ -19,10 +19,6 @@ lambda/*.json
 !lambda/package-lock.json
 !lambda/tsconfig.json
 
-# clasp
-gas/.clasp.json
-gas/.deploy-id
-
 # IDE
 .vscode/
 .idea/
