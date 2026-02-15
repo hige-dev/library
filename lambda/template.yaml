@@ -32,7 +32,6 @@ Parameters:
   AllowedOrigin:
     Type: String
     Description: Allowed CORS origin (e.g. https://your-domain.com)
-    Default: '*'
 
 Globals:
   Function:
@@ -46,6 +45,7 @@ Resources:
     Properties:
       Handler: dist/index.handler
       CodeUri: .
+      AutoPublishAlias: prd
       FunctionUrlConfig:
         AuthType: AWS_IAM
       Environment:
@@ -61,8 +61,11 @@ Resources:
 
 Outputs:
   FunctionUrl:
-    Description: Lambda Function URL
+    Description: Lambda Function URL (prd alias)
     Value: !GetAtt LibraryApiFunctionUrl.FunctionUrl
   FunctionArn:
     Description: Lambda Function ARN
     Value: !GetAtt LibraryApiFunction.Arn
+  FunctionName:
+    Description: Lambda Function Name
+    Value: !Ref LibraryApiFunction
