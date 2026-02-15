@@ -23,8 +23,8 @@
 | AWS Lambda | 月100万リクエスト | 社内利用では到達しない |
 | Amazon S3 | 5GB | 静的ファイルのみ、数MB程度 |
 | Amazon CloudFront | 月1TB転送 | |
-| Google Sheets API | 月60,000リクエスト | DBとして使用 |
-| Google Books API | 1日1,000リクエスト | 書籍登録時のみ使用 |
+| Google Sheets API | 無制限（レート制限あり） | 300リクエスト/分/プロジェクト。超過時は429エラー、1分で復帰 |
+| Google Books API | 1日1,000リクエスト | 書籍登録時のみ使用。超過時は429エラー、翌日リセット |
 | Google OAuth | 無料 | |
 | GCP Workload Identity Federation | 無料 | |
 
