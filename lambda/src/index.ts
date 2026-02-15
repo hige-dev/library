@@ -21,7 +21,11 @@ import { getUserRole, type Role } from './userService';
 import { searchGoogleBooks, getGoogleBookById } from './googleBooksService';
 
 function getAllowedOrigin(): string {
-  return process.env.ALLOWED_ORIGIN || '*';
+  const origin = process.env.ALLOWED_ORIGIN;
+  if (!origin) {
+    throw new Error('ALLOWED_ORIGIN 環境変数が設定されていません');
+  }
+  return origin;
 }
 
 function corsHeaders(): Record<string, string> {

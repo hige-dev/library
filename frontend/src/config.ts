@@ -34,7 +34,8 @@ export function getImageUrl(imageUrl: string | undefined | null): string {
  */
 export function isAllowedDomain(email: string): boolean {
   if (config.allowedDomains.length === 0) {
-    return true; // 許可ドメインが設定されていない場合は全て許可
+    console.error('VITE_ALLOWED_DOMAINS 環境変数が設定されていません');
+    return false;
   }
 
   const domain = email.split('@')[1];

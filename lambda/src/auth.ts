@@ -1,5 +1,9 @@
 import { OAuth2Client } from 'google-auth-library';
 
+if (!process.env.GOOGLE_CLIENT_ID) {
+  throw new Error('GOOGLE_CLIENT_ID 環境変数が設定されていません');
+}
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 interface AuthUser {
