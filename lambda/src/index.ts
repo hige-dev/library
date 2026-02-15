@@ -18,6 +18,7 @@ import {
   deleteReview,
 } from './reviewService';
 import { getUserRole, type Role } from './userService';
+import { searchGoogleBooks, getGoogleBookById } from './googleBooksService';
 
 function getAllowedOrigin(): string {
   return process.env.ALLOWED_ORIGIN || '*';
@@ -149,6 +150,13 @@ async function handleRequest(
     case 'deleteReview':
       await deleteReview(requireString(request, 'id'), userEmail, role);
       return null;
+
+    // Google Books API
+    case 'searchGoogleBooks':
+      return searchGoogleBooks(requireString(request, 'query'));
+
+    case 'getGoogleBookById':
+      return getGoogleBookById(requireString(request, 'volumeId'));
 
     default:
       throw new AppError('不明なアクション: ' + action);

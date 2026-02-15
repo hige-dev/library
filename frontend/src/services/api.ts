@@ -1,9 +1,6 @@
 import { config } from '../config';
 import type { Book, Loan, Review, ReviewWithBook, ApiResponse, GoogleBooksSearchResult, GoogleBooksVolume, Role } from '../types';
 
-// Google Books API
-const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
-
 // 認証トークン（グローバル）
 let authToken: string | null = null;
 
@@ -70,49 +67,17 @@ async function callApi<T>(action: string, params: Record<string, unknown> = {}):
 }
 
 /**
- * Google Books APIで書籍を検索（フロントエンドから直接）
+ * Google Books APIで書籍を検索（Lambda経由）
  */
 export async function searchGoogleBooks(query: string): Promise<GoogleBooksSearchResult> {
-  const params = new URLSearchParams({
-    q: query,
-    maxResults: '10',
-    langRestrict: 'ja',
-  });
-
-  if (config.googleBooksApiKey) {
-    params.set('key', config.googleBooksApiKey);
-  }
-
-  const response = await fetch(`${GOOGLE_BOOKS_API}?${params}`);
-
-  if (!response.ok) {
-    throw new Error(`Google Books API error: ${response.status}`);
-  }
-
-  return response.json();
+  return callApi<GoogleBooksSearchResult>('searchGoogleBooks', { query });
 }
 
 /**
- * Google Books APIで書籍詳細を取得（フロントエンドから直接）
+ * Google Books APIで書籍詳細を取得（Lambda経由）
  */
 export async function getGoogleBookById(volumeId: string): Promise<GoogleBooksVolume> {
-  const params = new URLSearchParams();
-
-  if (config.googleBooksApiKey) {
-    params.set('key', config.googleBooksApiKey);
-  }
-
-  const url = params.toString()
-    ? `${GOOGLE_BOOKS_API}/${volumeId}?${params}`
-    : `${GOOGLE_BOOKS_API}/${volumeId}`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Google Books API error: ${response.status}`);
-  }
-
-  return response.json();
+  return callApi<GoogleBooksVolume>('getGoogleBookById', { volumeId });
 }
 
 // ユーザーAPI

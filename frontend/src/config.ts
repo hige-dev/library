@@ -6,7 +6,6 @@ export const config: Config = {
   googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
   apiUrl: import.meta.env.VITE_API_URL || '',
   allowedDomains: (import.meta.env.VITE_ALLOWED_DOMAINS || '').split(',').filter(Boolean),
-  googleBooksApiKey: import.meta.env.VITE_GOOGLE_BOOKS_API_KEY || '',
 };
 
 /**
