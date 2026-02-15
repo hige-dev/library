@@ -7,6 +7,8 @@ import type { Book, Loan, BookWithLoan } from '../types';
 type FilterType = 'all' | 'available' | 'onLoan';
 type SortType = 'createdAt' | 'reviewCount' | 'rating';
 
+const ITEMS_PER_PAGE = 24;
+
 export function BookListPage() {
   const { user } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
@@ -15,6 +17,7 @@ export function BookListPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [genreFilter, setGenreFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortType>('createdAt');
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,6 +107,18 @@ export function BookListPage() {
 
     return result;
   }, [booksWithLoans, searchQuery, filter, genreFilter, sortBy]);
+
+  // フィルター条件変更時にページをリセット
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filter, genreFilter, sortBy]);
+
+  // ページネーション
+  const totalPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
+  const paginatedBooks = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredBooks.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredBooks, currentPage]);
 
   const handleBorrow = async (bookId: string) => {
     if (!user) return;
@@ -206,17 +221,48 @@ export function BookListPage() {
           {searchQuery ? '検索結果がありません。' : '該当する書籍がありません。'}
         </p>
       ) : (
-        <div className="book-grid">
-          {filteredBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              currentUserEmail={user?.email}
-              onBorrow={() => handleBorrow(book.id)}
-              onReturn={() => book.currentLoan && handleReturn(book.currentLoan.id)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="book-grid">
+            {paginatedBooks.map((book) => (
+              <BookCard
+                key={book.id}
+                book={book}
+                currentUserEmail={user?.email}
+                isAdmin={user?.role === 'admin'}
+                onBorrow={() => handleBorrow(book.id)}
+                onReturn={() => book.currentLoan && handleReturn(book.currentLoan.id)}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                className="pagination-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                前へ
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  className={`pagination-btn ${page === currentPage ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                className="pagination-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                次へ
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

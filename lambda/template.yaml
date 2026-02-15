@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Library API - Lambda Backend
+
+Parameters:
+  SpreadsheetId:
+    Type: String
+    Description: Google Spreadsheet ID
+  ServiceAccountKeyParam:
+    Type: String
+    Description: Parameter Store name for Google Service Account Key
+    Default: /library/google-service-account-key
+  AllowedDomains:
+    Type: String
+    Description: Comma-separated list of allowed email domains
+    Default: ''
+  GoogleClientId:
+    Type: String
+    Description: Google OAuth Client ID for ID Token verification
+  AllowedOrigin:
+    Type: String
+    Description: Allowed CORS origin (e.g. https://your-domain.com)
+    Default: '*'
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs24.x
+
+Resources:
+  LibraryApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/index.handler
+      CodeUri: .
+      FunctionUrlConfig:
+        AuthType: AWS_IAM
+      Environment:
+        Variables:
+          SPREADSHEET_ID: !Ref SpreadsheetId
+          SERVICE_ACCOUNT_KEY_PARAM: !Ref ServiceAccountKeyParam
+          ALLOWED_DOMAINS: !Ref AllowedDomains
+          GOOGLE_CLIENT_ID: !Ref GoogleClientId
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
+      Policies:
+        # ServiceAccountKeyParam と同期すること（先頭の / は不要）
+        - SSMParameterReadPolicy:
+            ParameterName: library/google-service-account-key
+
+Outputs:
+  FunctionUrl:
+    Description: Lambda Function URL
+    Value: !GetAtt LibraryApiFunctionUrl.FunctionUrl
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt LibraryApiFunction.Arn

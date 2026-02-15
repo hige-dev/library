@@ -145,7 +145,7 @@ export function LoanListPage() {
                     : '-'}
                 </td>
                 <td>
-                  {!loan.returnedAt && loan.borrower === user?.email && (
+                  {!loan.returnedAt && (loan.borrower === user?.email || user?.role === 'admin') && (
                     <button
                       onClick={() => handleReturn(loan.id)}
                       disabled={isProcessing}

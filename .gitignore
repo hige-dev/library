@@ -3,11 +3,21 @@ node_modules/
 
 # Build outputs
 frontend/dist/
+lambda/dist/
 
 # Environment files
 .env
 .env.*
 !.env.example
+
+# SAM
+lambda/samconfig.toml
+
+# Google service account key
+lambda/*.json
+!lambda/package.json
+!lambda/package-lock.json
+!lambda/tsconfig.json
 
 # clasp
 gas/.clasp.json

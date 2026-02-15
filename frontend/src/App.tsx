@@ -27,6 +27,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   return (
     <ProtectedRoute>
@@ -35,8 +45,8 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={<BookListPage />} />
           <Route path="/books/:id" element={<BookDetailPage />} />
-          <Route path="/register" element={<BookRegisterPage />} />
-          <Route path="/register/csv" element={<CsvRegisterPage />} />
+          <Route path="/register" element={<AdminRoute><BookRegisterPage /></AdminRoute>} />
+          <Route path="/register/csv" element={<AdminRoute><CsvRegisterPage /></AdminRoute>} />
           <Route path="/loans" element={<LoanListPage />} />
           <Route path="/reviews" element={<ReviewListPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

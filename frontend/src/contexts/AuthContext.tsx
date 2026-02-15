@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { User } from '../types';
+import type { User, Role } from '../types';
 import { isAllowedDomain } from '../config';
-import { setAuthToken } from '../services/api';
+import { setAuthToken, usersApi } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +35,17 @@ function isTokenExpired(token: string): boolean {
   }
 }
 
+/**
+ * APIからロールを取得し、失敗時は 'user' を返す
+ */
+async function fetchRole(): Promise<Role> {
+  try {
+    return await usersApi.getMyRole();
+  } catch {
+    return 'user';
+  }
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -43,53 +54,53 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // 初期化時にローカルストレージから復元
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem(STORAGE_KEY);
-      const storedToken = localStorage.getItem(TOKEN_KEY);
+    (async () => {
+      try {
+        const storedUser = localStorage.getItem(STORAGE_KEY);
+        const storedToken = localStorage.getItem(TOKEN_KEY);
 
-      if (storedUser && storedToken) {
-        // トークンの有効期限をチェック
-        if (isTokenExpired(storedToken)) {
-          // 期限切れの場合はクリア
-          localStorage.removeItem(STORAGE_KEY);
-          localStorage.removeItem(TOKEN_KEY);
-          setAuthToken(null);
+        if (storedUser && storedToken) {
+          if (isTokenExpired(storedToken)) {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(TOKEN_KEY);
+            setAuthToken(null);
+          } else {
+            setAuthToken(storedToken);
+            const role = await fetchRole();
+            const restored = { ...(JSON.parse(storedUser) as User), role };
+            setUser(restored);
+            setToken(storedToken);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
+          }
         } else {
-          // stateを設定する前にapi.tsにトークンを設定
-          setAuthToken(storedToken);
-          setUser(JSON.parse(storedUser) as User);
-          setToken(storedToken);
+          setAuthToken(null);
         }
-      } else {
+      } catch (e) {
+        console.error('Failed to restore auth state:', e);
         setAuthToken(null);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.error('Failed to restore auth state:', e);
-      setAuthToken(null);
-    } finally {
-      setIsLoading(false);
-    }
+    })();
   }, []);
 
-  const login = useCallback((credential: string) => {
+  const login = useCallback(async (credential: string) => {
     setError(null);
     try {
-      // JWTをデコード（base64）
       const payload = JSON.parse(atob(credential.split('.')[1]));
 
       const email = payload.email as string;
       const name = payload.name as string;
       const picture = payload.picture as string | undefined;
 
-      // ドメインチェック
       if (!isAllowedDomain(email)) {
         setError('このドメインからのログインは許可されていません。');
         return;
       }
 
-      const newUser: User = { email, name, picture };
-      // stateを設定する前にapi.tsにトークンを設定
       setAuthToken(credential);
+      const role = await fetchRole();
+      const newUser: User = { email, name, picture, role };
       setUser(newUser);
       setToken(credential);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
@@ -108,11 +119,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(TOKEN_KEY);
   }, []);
-
-  // トークンが変わった時にapi.tsに設定
-  useEffect(() => {
-    setAuthToken(token);
-  }, [token]);
 
   return (
     <AuthContext.Provider value={{ user, token, isLoading, error, login, logout }}>
