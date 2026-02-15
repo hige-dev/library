@@ -242,7 +242,7 @@ body {
 /* Book Grid */
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1.5rem;
 }
 
@@ -387,6 +387,36 @@ body {
   flex: 1;
   min-width: 200px;
   margin-bottom: 0;
+}
+
+.list-controls .filter-buttons,
+.list-controls .genre-filter,
+.list-controls .sort-filter {
+  margin-bottom: 0;
+}
+
+.list-controls .search-input,
+.list-controls .filter-btn,
+.list-controls .genre-select {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Page Navigation (Top) */
+.page-nav-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.page-nav-info {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  min-width: 4rem;
+  text-align: center;
 }
 
 .no-results {
@@ -603,21 +633,21 @@ body {
   color: var(--gray-500);
 }
 
-/* CSV Register Page */
-.csv-register-page h1 {
+/* Batch Register Page */
+.batch-register-page h1 {
   margin-bottom: 0.5rem;
 }
 
-.csv-register-page .description {
+.batch-register-page .description {
   color: var(--gray-500);
   margin-bottom: 1.5rem;
 }
 
-.csv-form {
+.batch-form {
   max-width: 600px;
 }
 
-.csv-input {
+.batch-input {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--gray-300);
@@ -627,7 +657,7 @@ body {
   resize: vertical;
 }
 
-.csv-input:focus {
+.batch-input:focus {
   outline: none;
   border-color: var(--primary-color);
 }

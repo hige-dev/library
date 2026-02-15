@@ -7,7 +7,7 @@ import type { Book, Loan, BookWithLoan } from '../types';
 type FilterType = 'all' | 'available' | 'onLoan';
 type SortType = 'createdAt' | 'reviewCount' | 'rating';
 
-const ITEMS_PER_PAGE = 24;
+const ITEMS_PER_PAGE = 12;
 
 export function BookListPage() {
   const { user } = useAuth();
@@ -120,6 +120,11 @@ export function BookListPage() {
     return filteredBooks.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredBooks, currentPage]);
 
+  // ページ変更時にスクロールをトップへ
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [currentPage]);
+
   const handleBorrow = async (bookId: string) => {
     if (!user) return;
     try {
@@ -222,7 +227,27 @@ export function BookListPage() {
         </p>
       ) : (
         <>
-          <div className="book-grid">
+          {totalPages > 1 && (
+            <div className="page-nav-top">
+              <button
+                className="pagination-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                前へ
+              </button>
+              <span className="page-nav-info">{currentPage} / {totalPages}</span>
+              <button
+                className="pagination-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                次へ
+              </button>
+            </div>
+          )}
+
+          <div className="book-grid" key={currentPage}>
             {paginatedBooks.map((book) => (
               <BookCard
                 key={book.id}
