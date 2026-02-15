@@ -12,7 +12,7 @@ fi
 
 S3_BUCKET="$1"
 CF_DISTRIBUTION_ID="$2"
-S3_PREFIX="${3:frontend}"
+S3_PREFIX="${3:-frontend}"
 
 echo "=== フロントエンドのデプロイ ==="
 
