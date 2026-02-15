@@ -11,8 +11,8 @@ type RegisterTab = 'search' | 'manual';
  * ISBN形式かどうかを判定（ハイフン除去後に10桁or13桁の数字）
  */
 function isIsbnQuery(query: string): boolean {
-  const digits = query.replace(/[-\s]/g, '');
-  return /^\d{10}$/.test(digits) || /^\d{13}$/.test(digits);
+  const cleaned = query.replace(/[-\s]/g, '');
+  return /^\d{9}[\dXx]$/.test(cleaned) || /^\d{13}$/.test(cleaned);
 }
 
 export function BookRegisterPage() {
@@ -187,10 +187,10 @@ export function BookRegisterPage() {
 
           <div className="register-actions">
             <button
-              onClick={() => navigate('/register/csv')}
+              onClick={() => navigate('/register/batch')}
               className="btn btn-secondary"
             >
-              CSV一括登録
+              一括登録
             </button>
           </div>
 

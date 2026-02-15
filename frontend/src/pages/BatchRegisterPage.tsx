@@ -5,17 +5,25 @@ import { useAuth } from '../contexts/AuthContext';
 import { LoadingSpinner } from '../components';
 import type { Book } from '../types';
 
+/**
+ * ISBN形式かどうかを判定（ハイフン除去後に10桁or13桁の数字、ISBN-10末尾X対応）
+ */
+function isIsbnQuery(query: string): boolean {
+  const cleaned = query.replace(/[-\s]/g, '');
+  return /^\d{9}[\dXx]$/.test(cleaned) || /^\d{13}$/.test(cleaned);
+}
+
 interface RegisterResult {
   title: string;
   status: 'success' | 'error' | 'not_found';
   message?: string;
 }
 
-export function CsvRegisterPage() {
+export function BatchRegisterPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [csvText, setCsvText] = useState('');
+  const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [results, setResults] = useState<RegisterResult[]>([]);
@@ -23,9 +31,9 @@ export function CsvRegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!csvText.trim() || !user) return;
+    if (!inputText.trim() || !user) return;
 
-    const titles = csvText
+    const titles = inputText
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
@@ -49,7 +57,11 @@ export function CsvRegisterPage() {
       setProgress({ current: i + 1, total: titles.length });
 
       try {
-        const searchResult = await searchGoogleBooks(title);
+        // ISBN形式なら isbn: プレフィックスを付与して精度向上
+        const query = isIsbnQuery(title)
+          ? `isbn:${title.replace(/[-\s]/g, '')}`
+          : title;
+        const searchResult = await searchGoogleBooks(query);
 
         if (!searchResult.items || searchResult.items.length === 0) {
           registerResults.push({
@@ -116,21 +128,21 @@ export function CsvRegisterPage() {
   const notFoundCount = results.filter((r) => r.status === 'not_found').length;
 
   return (
-    <div className="csv-register-page">
-      <h1>CSV一括登録</h1>
+    <div className="batch-register-page">
+      <h1>一括登録</h1>
       <p className="description">
-        登録したい書籍のタイトルを1行に1つずつ入力してください。
+        登録したい書籍のタイトルまたはISBNを1行に1つずつ入力してください。
         Google Books APIで検索し、見つかった書籍を一括で登録します。
       </p>
 
-      <form onSubmit={handleSubmit} className="csv-form">
+      <form onSubmit={handleSubmit} className="batch-form">
         <textarea
-          placeholder="書籍タイトルを1行に1つずつ入力&#10;例:&#10;リーダブルコード&#10;プログラミングの基礎&#10;Clean Architecture"
-          value={csvText}
-          onChange={(e) => setCsvText(e.target.value)}
+          placeholder="書籍タイトルまたはISBNを1行に1つずつ入力&#10;例:&#10;リーダブルコード&#10;978-4-87311-565-8&#10;Clean Architecture"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
           rows={10}
           disabled={isProcessing}
-          className="csv-input"
+          className="batch-input"
         />
 
         <div className="form-actions">
@@ -143,7 +155,7 @@ export function CsvRegisterPage() {
           </button>
           <button
             type="submit"
-            disabled={isProcessing || !csvText.trim()}
+            disabled={isProcessing || !inputText.trim()}
             className="btn btn-primary"
           >
             一括登録

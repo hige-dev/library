@@ -6,7 +6,7 @@ import {
   BookListPage,
   BookDetailPage,
   BookRegisterPage,
-  CsvRegisterPage,
+  BatchRegisterPage,
   LoanListPage,
   ReviewListPage,
 } from './pages';
@@ -46,7 +46,7 @@ function AppRoutes() {
           <Route path="/" element={<BookListPage />} />
           <Route path="/books/:id" element={<BookDetailPage />} />
           <Route path="/register" element={<AdminRoute><BookRegisterPage /></AdminRoute>} />
-          <Route path="/register/csv" element={<AdminRoute><CsvRegisterPage /></AdminRoute>} />
+          <Route path="/register/batch" element={<AdminRoute><BatchRegisterPage /></AdminRoute>} />
           <Route path="/loans" element={<LoanListPage />} />
           <Route path="/reviews" element={<ReviewListPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
