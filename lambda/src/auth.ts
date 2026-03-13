@@ -1,10 +1,12 @@
 import { OAuth2Client } from 'google-auth-library';
 
-if (!process.env.GOOGLE_CLIENT_ID) {
+const skipAuth = process.env.SKIP_AUTH === 'true';
+
+if (!skipAuth && !process.env.GOOGLE_CLIENT_ID) {
   throw new Error('GOOGLE_CLIENT_ID 環境変数が設定されていません');
 }
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = skipAuth ? null : new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 interface AuthUser {
   email: string;
@@ -21,6 +23,7 @@ interface AuthResult {
  * Google ID Token を検証
  */
 async function verifyIdToken(token: string): Promise<AuthUser | null> {
+  if (!client) return null;
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
@@ -54,8 +57,20 @@ function getAllowedDomains(): string[] {
 
 /**
  * リクエストを認証
+ * SKIP_AUTH=true の場合はダミーユーザーで認証をスキップ
  */
 export async function authenticateRequest(token: string | undefined): Promise<AuthResult> {
+  if (skipAuth) {
+    return {
+      user: {
+        email: process.env.DEV_USER_EMAIL || 'dev@example.com',
+        name: 'Development User',
+        picture: null,
+      },
+      error: null,
+    };
+  }
+
   if (!token) {
     return { user: null, error: 'Token required' };
   }
