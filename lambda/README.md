@@ -201,8 +201,43 @@ aws lambda add-permission \
 | `ALLOWED_DOMAINS` | 許可ドメイン（カンマ区切り、空で全許可） |
 | `GOOGLE_CLIENT_ID` | Google OAuthクライアントID（ID Token検証用） |
 | `ALLOWED_ORIGIN` | CORSで許可するオリジン（デフォルト: `*`） |
+| `SKIP_AUTH` | `true` でリクエスト認証をスキップ（ローカル開発用） |
+| `DEV_USER_EMAIL` | 認証スキップ時のダミーユーザーメール（デフォルト: `dev@example.com`） |
+| `GOOGLE_APPLICATION_CREDENTIALS` | サービスアカウントキーのパス（ローカル開発用） |
 
 ## 開発
+
+### ローカル開発サーバー
+
+SAM CLI を使わずに、ローカルでAPIサーバーを起動できます。
+
+```bash
+# 環境変数ファイルを作成
+cp .env.example .env
+```
+
+`.env` を編集:
+
+```
+SPREADSHEET_ID=your-spreadsheet-id
+GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account-key.json
+GOOGLE_CLIENT_ID=your-client-id
+SKIP_AUTH=true
+ALLOWED_ORIGIN=http://localhost:5173
+```
+
+| 変数 | 説明 |
+|------|------|
+| `GOOGLE_APPLICATION_CREDENTIALS` | GCPサービスアカウントキーのJSONファイルパス。<br>WIFの代わりにこのキーでGCP APIを認証する |
+| `SKIP_AUTH` | `true` にするとリクエストの認証（ID Token検証）をスキップ |
+
+```bash
+npm run dev
+```
+
+http://localhost:3001 でAPIサーバーが起動します。
+
+### その他のコマンド
 
 ```bash
 # ビルド

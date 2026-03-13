@@ -62,10 +62,10 @@ RDSやDynamoDB等の有料DBを使わず、Google スプレッドシートをデ
 | 層 | 本番 | 開発 |
 |----|------|------|
 | フロントエンド | React + TypeScript (S3+CloudFront) | React + TypeScript (Vite) |
-| バックエンド | AWS Lambda (Function URL + CloudFront OAC) | 同左（SAM CLI） |
+| バックエンド | AWS Lambda (Function URL + CloudFront OAC) | ローカル開発サーバー（`npm run dev`） |
 | データベース | Google スプレッドシート | 同左（開発用シート） |
 | 認証 | Google Identity Services | 同左 |
-| GCP認証 | Workload Identity Federation | 同左 |
+| GCP認証 | Workload Identity Federation | サービスアカウントキー |
 
 ## ディレクトリ構造
 
@@ -192,6 +192,21 @@ VITE_ALLOWED_DOMAINS=              # 空欄で全ドメイン許可
 ```
 
 ### 6. 開発サーバーの起動
+
+#### バックエンド
+
+```bash
+cd lambda
+cp .env.example .env
+# .env を編集（SPREADSHEET_ID, GOOGLE_APPLICATION_CREDENTIALS 等を設定）
+npm install
+npm run dev
+```
+
+http://localhost:3001 でAPIサーバーが起動します。
+`SKIP_AUTH=true` で認証をスキップできます（デフォルト有効）。
+
+#### フロントエンド
 
 ```bash
 cd frontend
