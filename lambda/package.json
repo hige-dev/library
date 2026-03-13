@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "npx tsx --env-file=.env src/local.ts",
     "build": "tsc",
     "clean": "rm -rf dist"
   },
