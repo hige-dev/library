@@ -1,7 +1,15 @@
-import { AwsClient } from 'google-auth-library';
+import { AwsClient, GoogleAuth } from 'google-auth-library';
 import type { AwsClientOptions } from 'google-auth-library/build/src/auth/awsclient';
 
-let authClient: AwsClient | null = null;
+let authClient: AwsClient | GoogleAuth | null = null;
+
+/**
+ * ローカル環境かどうかを判定
+ * GOOGLE_APPLICATION_CREDENTIALS が設定されている場合はローカル環境とみなす
+ */
+function isLocalEnv(): boolean {
+  return !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
+}
 
 /**
  * Workload Identity Federation の認証情報を構築
@@ -36,17 +44,29 @@ function getWifCredentials(): AwsClientOptions {
 }
 
 /**
- * WIF 認証クライアントを取得（シングルトン）
+ * GCP 認証クライアントを取得（シングルトン）
+ * ローカル環境: GOOGLE_APPLICATION_CREDENTIALS を使用した GoogleAuth
+ * 本番環境: Workload Identity Federation を使用した AwsClient
  */
-export function getAuthClient(): AwsClient {
+export function getAuthClient(): AwsClient | GoogleAuth {
   if (authClient) return authClient;
 
-  const credentials = getWifCredentials();
-  authClient = new AwsClient(credentials);
-  authClient.scopes = [
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/books',
-  ];
+  if (isLocalEnv()) {
+    authClient = new GoogleAuth({
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/books',
+      ],
+    });
+  } else {
+    const credentials = getWifCredentials();
+    const client = new AwsClient(credentials);
+    client.scopes = [
+      'https://www.googleapis.com/auth/spreadsheets',
+      'https://www.googleapis.com/auth/books',
+    ];
+    authClient = client;
+  }
 
   return authClient;
 }
